@@ -3,6 +3,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import UserDetailScreen from "../screens/profile/userDetail/UserDetailScreen";
 import EditUserDetailScreen from "../screens/profile/userDetail/EditUserDetailScreen";
+import EducationDetailScreen from "../screens/profile/education/EducationDetailScreen";
+import CreateEducationScreen from "../screens/profile/education/CreateEducationScreen";
 import ChangePasswordScreen from "../screens/profile/changePassword/ChangePasswordScreen";
 
 const Stack = createStackNavigator();
@@ -15,6 +17,14 @@ export default function ProfileStack() {
       <Stack.Screen
         name="EditUserDetailScreen"
         component={EditUserDetailScreen}
+      />
+      <Stack.Screen
+        name="EducationDetailScreen"
+        component={EducationDetailScreen}
+      />
+      <Stack.Screen
+        name="CreateEducationScreen"
+        component={CreateEducationScreen}
       />
       <Stack.Screen
         name="ChangePasswordScreen"
