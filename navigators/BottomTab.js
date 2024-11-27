@@ -23,7 +23,7 @@ export default function BottomTab() {
         name="JobVacancyStack"
         component={JobVacancyStack}
         options={{
-          tabBarLabel: "Job Vacancies",
+          tabBarLabel: "Lowongan Kerja",
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Icon name="work-outline" size={size} color={color} />
@@ -35,7 +35,7 @@ export default function BottomTab() {
         name="JobApplicationStack"
         component={JobApplicationStack}
         options={{
-          tabBarLabel: "Job Application",
+          tabBarLabel: "Lamaran Kerja",
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Icon name="description" size={size} color={color} />
@@ -47,7 +47,7 @@ export default function BottomTab() {
         name="ProfileStack"
         component={ProfileStack}
         options={{
-          tabBarLabel: "Profile",
+          tabBarLabel: "Profil",
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Icon name="person-outline" size={size} color={color} />
