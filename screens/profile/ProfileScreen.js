@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,12 +6,50 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
+  Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function ProfileScreen({ navigation }) {
+  const [username, setUsername] = useState("Loading...");
+  const [email, setEmail] = useState("Loading...");
+
+  async function fetchUsername() {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/profile/name`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const result = await response.json();
+
+      if (response.ok) {
+        setUsername(result.data.username);
+        setEmail(result.data.email);
+      } else {
+        throw new Error("Failed to fetch username");
+      }
+    } catch (error) {
+      setUsername("==error fetching name==");
+      setEmail("==error fetching email==");
+      Alert.alert("Error", "Failed to fetch username");
+    }
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUsername();
+    }, [])
+  );
+
   const buttons = [
-    { name: "Identitas Diri", icon: "person" },
+    { name: "Identitas Diri", icon: "person", screen: "UserDetailScreen" },
     { name: "Riwayat Pendidikan", icon: "school" },
     { name: "Riwayat Pengalaman", icon: "work" },
     { name: "Ganti Password", icon: "lock", screen: "ChangePasswordScreen" },
@@ -41,7 +79,8 @@ export default function ProfileScreen({ navigation }) {
             <Icon name="edit" size={20} color="#ffffff" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.profileName}>John Doe</Text>
+        <Text style={styles.profileName}>{username}</Text>
+        <Text style={styles.profileEmail}>{email}</Text>
       </View>
 
       <FlatList
@@ -87,6 +126,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#ffffff",
     marginTop: 8,
+  },
+  profileEmail: {
+    fontSize: 16,
+    color: "#ffffff",
   },
   buttonsContainer: {
     padding: 16,
