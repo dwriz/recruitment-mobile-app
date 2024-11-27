@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import MainStack from "./navigators/MainStack";
 import AuthProvider, { AuthContext } from "./contexts/AuthContext";
-import { TouchableOpacity, Image } from "react-native";
+import { Text, TouchableOpacity, Image } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useContext } from "react";
 
@@ -14,8 +14,12 @@ function AppContent() {
 
   function LogoutIcon() {
     return (
-      <TouchableOpacity onPress={handleLogout} style={{ marginRight: 15 }}>
-        <Icon name="logout" size={24} color="#FFFFFF" />
+      <TouchableOpacity
+        onPress={handleLogout}
+        style={{ marginRight: 15, alignItems: "center" }}
+      >
+        <Icon name="logout" size={20} color="#FFFFFF" />
+        <Text style={{ fontSize: 10, color: "#FFFFFF" }}>Logout</Text>
       </TouchableOpacity>
     );
   }

@@ -128,7 +128,7 @@ export default function LandingScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#6677a1",
   },
   listContainer: {
     padding: 16,
@@ -169,6 +169,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   paginationContainer: {
+    backgroundColor: "#fff",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
