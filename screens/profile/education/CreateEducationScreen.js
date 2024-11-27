@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 12,
     justifyContent: "center",
-    height: 50, // Match the height of the input fields
+    height: 50,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#ccc",

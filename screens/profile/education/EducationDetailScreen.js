@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 export default function EducationDetailScreen({ navigation }) {
   const [educations, setEducations] = useState([]);
@@ -37,6 +38,30 @@ export default function EducationDetailScreen({ navigation }) {
       Alert.alert("Error", "Failed to fetch education details");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(educationId) {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/educations/${educationId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        Alert.alert("Success", "Riwayat pendidikan berhasil dihapus.");
+        fetchEducations();
+      } else {
+        Alert.alert("Error", "Gagal menghapus riwayat pendidikan.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Server Error");
     }
   }
 
@@ -68,6 +93,33 @@ export default function EducationDetailScreen({ navigation }) {
             {item.month_education_start} {item.year_education_start} -{" "}
             {item.month_education_end} {item.year_education_end}
           </Text>
+        </View>
+        <View style={styles.iconContainer}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("EditEducationScreen", { education: item })
+            }
+          >
+            <Icon name="edit" size={24} color="#243d8f" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              Alert.alert(
+                "Konfirmasi",
+                "Apakah Anda yakin ingin menghapus riwayat pendidikan ini?",
+                [
+                  { text: "Batal", style: "cancel" },
+                  {
+                    text: "Hapus",
+                    onPress: () => handleDelete(item.id),
+                    style: "destructive",
+                  },
+                ]
+              )
+            }
+          >
+            <Icon name="delete" size={24} color="#ff0000" />
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -156,6 +208,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     flex: 1,
+  },
+  iconContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 16,
   },
   errorText: {
     textAlign: "center",
