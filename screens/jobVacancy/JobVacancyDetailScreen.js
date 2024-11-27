@@ -1,9 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
 
-export default function JobVacancyDetailScreen() {
+export default function JobVacancyDetailScreen({ navigation, route }) {
+  const { id } = route.params;
   return (
     <View style={styles.container}>
       <Text>JobVacancyDetailScreen</Text>
+      <Text>{id}</Text>
     </View>
   );
 }

@@ -35,7 +35,7 @@ export default function BottomTab() {
         name="JobApplicationStack"
         component={JobApplicationStack}
         options={{
-          tabBarLabel: "Lamaran Kerja",
+          tabBarLabel: "Status Lamaran",
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Icon name="description" size={size} color={color} />
