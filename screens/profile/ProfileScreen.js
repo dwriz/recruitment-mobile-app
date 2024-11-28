@@ -51,7 +51,7 @@ export default function ProfileScreen({ navigation }) {
   const buttons = [
     { name: "Identitas Diri", icon: "person", screen: "UserDetailScreen" },
     { name: "Riwayat Pendidikan", icon: "school", screen: "EducationDetailScreen" },
-    { name: "Riwayat Pengalaman", icon: "work" },
+    { name: "Riwayat Pengalaman", icon: "work", screen: "ExperienceDetailScreen" },
     { name: "Ganti Password", icon: "lock", screen: "ChangePasswordScreen" },
   ];
 

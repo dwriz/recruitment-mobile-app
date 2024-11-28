@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function EditEducationScreen({ route, navigation }) {
   const { education } = route.params;
@@ -83,9 +84,11 @@ export default function EditEducationScreen({ route, navigation }) {
     }
   }
 
-  useEffect(() => {
-    fetchOptions();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchOptions();
+    }, [])
+  );
 
   async function handleSave() {
     if (
