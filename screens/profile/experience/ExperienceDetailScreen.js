@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 export default function ExperienceDetailScreen({ navigation }) {
   const [experiences, setExperiences] = useState([]);
@@ -31,12 +32,35 @@ export default function ExperienceDetailScreen({ navigation }) {
       if (response.ok) {
         setExperiences(result.data.experiences);
       } else {
-        throw new Error("Failed to fetch experiences");
+        throw new Error("Gagal mengambil data riwayat pengalaman");
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch experiences");
+      Alert.alert("Error", "Server Error");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(id) {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/experiences/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.ok) {
+        Alert.alert("Success", "Sukses menghapus riwayat pengalaman");
+        fetchExperiences();
+      } else {
+        Alert.alert("Error", "Gagal menghapus riwayat pengalaman");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Server Error");
     }
   }
 
@@ -62,7 +86,7 @@ export default function ExperienceDetailScreen({ navigation }) {
         <View style={styles.row}>
           <Text style={styles.field}>Periode</Text>
           <Text style={styles.value}>
-            {item.start_month_experience} {item.start_year_experience} -{" "}
+            {item.start_month_experience} {item.start_year_experience} -
             {item.still_active
               ? "Sekarang"
               : `${item.end_month_experience} ${item.end_year_experience}`}
@@ -75,6 +99,29 @@ export default function ExperienceDetailScreen({ navigation }) {
         <View style={styles.row}>
           <Text style={styles.field}>Keahlian</Text>
           <Text style={styles.value}>{item.desc_skill}</Text>
+        </View>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("EditExperienceScreen", { experience: item })
+            }
+          >
+            <Icon name="edit" size={24} color="#243d8f" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              Alert.alert(
+                "Konfirmasi",
+                "Apakah Anda yakin ingin menghapus pengalaman ini?",
+                [
+                  { text: "Batal", style: "cancel" },
+                  { text: "Hapus", onPress: () => handleDelete(item.id) },
+                ]
+              )
+            }
+          >
+            <Icon name="delete" size={24} color="#ff0000" />
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -169,6 +216,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     flex: 1,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 12,
   },
   errorText: {
     textAlign: "center",
