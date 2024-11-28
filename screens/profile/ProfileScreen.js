@@ -175,6 +175,7 @@ export default function ProfileScreen({ navigation }) {
       icon: "work",
       screen: "ExperienceDetailScreen",
     },
+    { name: "Dokumen Pendukung", icon: "feed", screen: "AttachmentDetailScreen" },
     { name: "Ganti Password", icon: "lock", screen: "ChangePasswordScreen" },
   ];
 
@@ -213,7 +214,6 @@ export default function ProfileScreen({ navigation }) {
         contentContainerStyle={styles.buttonsContainer}
       />
 
-      {/* Modal for Uploading Indicator */}
       <Modal visible={uploading} transparent={true} animationType="fade">
         <View style={styles.modalBackground}>
           <ActivityIndicator size="large" color="#ffffff" />

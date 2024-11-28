@@ -9,6 +9,7 @@ import EditEducationScreen from "../screens/profile/education/EditEducationScree
 import ExperienceDetailScreen from "../screens/profile/experience/ExperienceDetailScreen";
 import CreateExperienceScreen from "../screens/profile/experience/CreateExperienceScreen";
 import EditExperienceScreen from "../screens/profile/experience/EditExperienceScreen";
+import AttachmentDetailScreen from "../screens/profile/attachment/AttachmentDetailScreen";
 import ChangePasswordScreen from "../screens/profile/changePassword/ChangePasswordScreen";
 
 const Stack = createStackNavigator();
@@ -45,6 +46,10 @@ export default function ProfileStack() {
       <Stack.Screen
         name="EditExperienceScreen"
         component={EditExperienceScreen}
+      />
+      <Stack.Screen
+        name="AttachmentDetailScreen"
+        component={AttachmentDetailScreen}
       />
       <Stack.Screen
         name="ChangePasswordScreen"
