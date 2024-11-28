@@ -7,14 +7,22 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import { useFocusEffect } from "@react-navigation/native";
 
 export default function ProfileScreen({ navigation }) {
   const [username, setUsername] = useState("Loading...");
   const [email, setEmail] = useState("Loading...");
+  const [profilePicture, setProfilePicture] = useState(
+    require("../../assets/profile_picture_placeholder.jpg")
+  );
+  const [uploading, setUploading] = useState(false);
 
   async function fetchUsername() {
     try {
@@ -42,16 +50,131 @@ export default function ProfileScreen({ navigation }) {
     }
   }
 
+  async function fetchProfilePicture() {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/profile/picture`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const result = await response.json();
+
+      if (response.ok && result.data?.profilePictureUrl) {
+        setProfilePicture({ uri: result.data.profilePictureUrl });
+      }
+    } catch (error) {
+      setProfilePicture(
+        require("../../assets/profile_picture_placeholder.jpg")
+      );
+    }
+  }
+
+  async function pickImageAndUpload() {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    console.log("====permissionResult====");
+    console.log(permissionResult);
+    console.log("====permissionResult====");
+
+    if (!permissionResult.granted) {
+      Alert.alert(
+        "Permission Denied",
+        "Permission to access the gallery is required."
+      );
+      return;
+    }
+
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!pickerResult.canceled && pickerResult.assets?.length > 0) {
+      setUploading(true);
+
+      const localUri = pickerResult.assets[0].uri;
+
+      const fileInfo = await FileSystem.getInfoAsync(localUri);
+      const fileExtension = localUri.split(".").pop().toLowerCase();
+
+      if (fileInfo.size > 5 * 1024 * 1024) {
+        setUploading(false);
+        Alert.alert("Error", "The image size should not exceed 5MB.");
+        return;
+      }
+
+      const jpgUri =
+        fileExtension !== "jpg" && fileExtension !== "jpeg"
+          ? await FileSystem.writeAsStringAsync(
+              FileSystem.documentDirectory + "profile_picture.jpg",
+              await FileSystem.readAsStringAsync(localUri),
+              {
+                encoding: FileSystem.EncodingType.Base64,
+              }
+            )
+          : localUri;
+
+      const token = await AsyncStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("profile_picture", {
+        uri: jpgUri,
+        type: "image/jpeg",
+        name: "profile_picture.jpg",
+      });
+
+      try {
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_API_URL}/profile/picture`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+            body: formData,
+          }
+        );
+
+        if (response.ok) {
+          fetchProfilePicture();
+          Alert.alert("Success", "Profile picture updated successfully.");
+        } else {
+          Alert.alert("Error", "Failed to upload profile picture.");
+        }
+      } catch (error) {
+        Alert.alert("Error", "Server error while uploading profile picture.");
+      } finally {
+        setUploading(false);
+      }
+    }
+  }
+
   useFocusEffect(
     useCallback(() => {
       fetchUsername();
+      fetchProfilePicture();
     }, [])
   );
 
   const buttons = [
     { name: "Identitas Diri", icon: "person", screen: "UserDetailScreen" },
-    { name: "Riwayat Pendidikan", icon: "school", screen: "EducationDetailScreen" },
-    { name: "Riwayat Pengalaman", icon: "work", screen: "ExperienceDetailScreen" },
+    {
+      name: "Riwayat Pendidikan",
+      icon: "school",
+      screen: "EducationDetailScreen",
+    },
+    {
+      name: "Riwayat Pengalaman",
+      icon: "work",
+      screen: "ExperienceDetailScreen",
+    },
     { name: "Ganti Password", icon: "lock", screen: "ChangePasswordScreen" },
   ];
 
@@ -71,11 +194,11 @@ export default function ProfileScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.profileImageWrapper}>
-          <Image
-            source={require("../../assets/profile_picture_placeholder.jpg")}
-            style={styles.profileImage}
-          />
-          <TouchableOpacity style={styles.editIcon}>
+          <Image source={profilePicture} style={styles.profileImage} />
+          <TouchableOpacity
+            style={styles.editIcon}
+            onPress={pickImageAndUpload}
+          >
             <Icon name="edit" size={20} color="#ffffff" />
           </TouchableOpacity>
         </View>
@@ -89,6 +212,13 @@ export default function ProfileScreen({ navigation }) {
         keyExtractor={(item) => item.name}
         contentContainerStyle={styles.buttonsContainer}
       />
+
+      {/* Modal for Uploading Indicator */}
+      <Modal visible={uploading} transparent={true} animationType="fade">
+        <View style={styles.modalBackground}>
+          <ActivityIndicator size="large" color="#ffffff" />
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -149,5 +279,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#243d8f",
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });
