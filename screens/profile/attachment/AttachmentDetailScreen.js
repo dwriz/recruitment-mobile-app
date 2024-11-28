@@ -13,6 +13,8 @@ import * as Linking from "expo-linking";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useFocusEffect } from "@react-navigation/native";
 
+
+
 export default function AttachmentDetailScreen() {
   const [attachments, setAttachments] = useState([]);
   const [loading, setLoading] = useState(true);
