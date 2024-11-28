@@ -7,17 +7,22 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Linking from "expo-linking";
+import * as DocumentPicker from "expo-document-picker";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useFocusEffect } from "@react-navigation/native";
-
-
+import { Picker } from "@react-native-picker/picker";
 
 export default function AttachmentDetailScreen() {
   const [attachments, setAttachments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [documentTypes, setDocumentTypes] = useState([]);
+  const [selectedDocumentType, setSelectedDocumentType] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   async function fetchAttachments() {
     try {
@@ -38,9 +43,32 @@ export default function AttachmentDetailScreen() {
         throw new Error("Failed to fetch attachments");
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch attachments.");
+      Alert.alert("Error", "Gagal memuat dokumen pendukung");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchDocumentTypes() {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/options/document-types`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const result = await response.json();
+
+      if (response.ok) {
+        setDocumentTypes(result.data.documentTypes);
+      } else {
+        throw new Error("Failed to fetch document types");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Gagal memuat jenis dokumen");
     }
   }
 
@@ -68,9 +96,77 @@ export default function AttachmentDetailScreen() {
     }
   }
 
+  async function handleFileUpload() {
+    const fileResult = await DocumentPicker.getDocumentAsync({
+      type: ["image/*", "application/pdf"],
+      copyToCacheDirectory: true,
+    });
+
+    if (fileResult.type === "cancel") {
+      return;
+    }
+
+    const asset = fileResult.assets ? fileResult.assets[0] : null;
+
+    if (!asset) {
+      Alert.alert("Error", "Gagal melampirkan file - silakan coba kembali");
+      return;
+    }
+
+    const file = {
+      uri: asset.uri,
+      name: asset.name,
+      type: asset.mimeType,
+    };
+
+    if (asset.size > 5 * 1024 * 1024) {
+      Alert.alert("Error", "Ukuran file tidak dapat melebihi 5 MB");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("Authentication token is missing.");
+      }
+
+      const formData = new FormData();
+      formData.append("document_type_id", selectedDocumentType);
+      formData.append("profile_attachment", file);
+
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/profile/attachments`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+          body: formData,
+        }
+      );
+
+      if (response.ok) {
+        Alert.alert("Success", "Dokumen berhasil diunggah");
+        fetchAttachments();
+      } else {
+        Alert.alert("Error", "Gagal mengunggah dokumen");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Terjadi kesalahan saat mengunggah dokumen");
+    } finally {
+      setUploading(false);
+      setModalVisible(false);
+    }
+  }
+
   useFocusEffect(
     useCallback(() => {
       fetchAttachments();
+      fetchDocumentTypes();
     }, [])
   );
 
@@ -117,14 +213,6 @@ export default function AttachmentDetailScreen() {
     );
   }
 
-  if (attachments.length === 0) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.noDataText}>Tidak ada data lampiran dokumen</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <FlatList
@@ -133,6 +221,58 @@ export default function AttachmentDetailScreen() {
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
       />
+
+      <TouchableOpacity
+        style={styles.uploadButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={styles.uploadButtonText}>Upload Dokumen Pendukung</Text>
+      </TouchableOpacity>
+
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Pilih Jenis Dokumen</Text>
+            <Picker
+              selectedValue={selectedDocumentType}
+              onValueChange={(itemValue) => setSelectedDocumentType(itemValue)}
+              style={styles.picker}
+            >
+              {documentTypes.map((type) => (
+                <Picker.Item
+                  key={type.id}
+                  label={type.param_data}
+                  value={type.id}
+                />
+              ))}
+            </Picker>
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={handleFileUpload}
+              disabled={!selectedDocumentType}
+            >
+              <Text style={styles.confirmButtonText}>Pilih Dokumen</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.cancelButtonText}>Batal</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {uploading && (
+        <View style={styles.uploadingOverlay}>
+          <ActivityIndicator size="large" color="#ffffff" />
+        </View>
+      )}
     </View>
   );
 }
@@ -180,9 +320,73 @@ const styles = StyleSheet.create({
   iconButton: {
     borderRadius: 8,
   },
-  noDataText: {
-    textAlign: "center",
+  uploadButton: {
+    backgroundColor: "#243d8f",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  uploadButtonText: {
+    color: "#fff",
     fontSize: 16,
-    color: "#666",
+    fontWeight: "bold",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "90%",
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 16,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  picker: {
+    width: "100%",
+    marginBottom: 16,
+  },
+  confirmButton: {
+    backgroundColor: "#243d8f",
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginBottom: 8,
+    alignItems: "center",
+    width: "100%",
+  },
+  confirmButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  cancelButton: {
+    backgroundColor: "#ccc",
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%",
+  },
+  cancelButtonText: {
+    color: "#333",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  uploadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

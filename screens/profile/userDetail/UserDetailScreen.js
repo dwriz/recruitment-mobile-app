@@ -33,7 +33,7 @@ export default function UserDetailScreen({ navigation }) {
         throw new Error("Failed to fetch user details");
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch user details");
+      Alert.alert("Error", "Gagal memuat data identitas diri");
     } finally {
       setLoading(false);
     }

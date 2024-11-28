@@ -14,7 +14,7 @@ export default function AuthProvider({ children }) {
       await AsyncStorage.removeItem("token");
       setIsLoggedIn(false);
     } catch (error) {
-      Alert.alert("Error", `Error logging out\nPlease restart the app.`);
+      Alert.alert("Error", `Gagal melakukan logout\nSilakan restart aplikasi`);
     }
   }
 

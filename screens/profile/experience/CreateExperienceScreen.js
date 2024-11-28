@@ -54,7 +54,7 @@ export default function CreateExperienceScreen({ navigation }) {
 
       setLoading(false);
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch dropdown options.");
+      Alert.alert("Error", "Gagal memuat data opsi");
       setLoading(false);
     }
   }
@@ -84,7 +84,7 @@ export default function CreateExperienceScreen({ navigation }) {
       !descExperience ||
       !descSkill
     ) {
-      Alert.alert("Error", "All fields must be filled.");
+      Alert.alert("Error", "Seluruh input harus terisi");
       return;
     }
 
@@ -115,13 +115,13 @@ export default function CreateExperienceScreen({ navigation }) {
       );
 
       if (response.ok) {
-        Alert.alert("Success", "Experience successfully added.");
+        Alert.alert("Success", "Data riwayat pengalaman berhasil disimpan");
         navigation.goBack();
       } else {
-        Alert.alert("Error", "Failed to save experience.");
+        Alert.alert("Error", "Gagal menyimpan data riwayat pengalaman");
       }
     } catch (error) {
-      Alert.alert("Error", "Server error.");
+      Alert.alert("Error", "Server Error");
     }
   }
 

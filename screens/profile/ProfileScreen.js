@@ -46,7 +46,7 @@ export default function ProfileScreen({ navigation }) {
     } catch (error) {
       setUsername("==error fetching name==");
       setEmail("==error fetching email==");
-      Alert.alert("Error", "Failed to fetch username");
+      Alert.alert("Error", "Gagal memuat data profil");
     }
   }
 
@@ -77,10 +77,6 @@ export default function ProfileScreen({ navigation }) {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    console.log("====permissionResult====");
-    console.log(permissionResult);
-    console.log("====permissionResult====");
-
     if (!permissionResult.granted) {
       Alert.alert(
         "Permission Denied",
@@ -106,7 +102,7 @@ export default function ProfileScreen({ navigation }) {
 
       if (fileInfo.size > 5 * 1024 * 1024) {
         setUploading(false);
-        Alert.alert("Error", "The image size should not exceed 5MB.");
+        Alert.alert("Error", "Ukuran gambar tidak dapat melebihi 5 MB");
         return;
       }
 
@@ -144,12 +140,12 @@ export default function ProfileScreen({ navigation }) {
 
         if (response.ok) {
           fetchProfilePicture();
-          Alert.alert("Success", "Profile picture updated successfully.");
+          Alert.alert("Success", "Foto profil berhasil diunggah");
         } else {
-          Alert.alert("Error", "Failed to upload profile picture.");
+          Alert.alert("Error", "Gagal mengunggah foto profil");
         }
       } catch (error) {
-        Alert.alert("Error", "Server error while uploading profile picture.");
+        Alert.alert("Error", "Server Error");
       } finally {
         setUploading(false);
       }

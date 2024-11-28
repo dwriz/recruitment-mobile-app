@@ -60,7 +60,7 @@ export default function ChangePasswordScreen({ navigation }) {
       } else if (response.status === 401) {
         Alert.alert("Error", "Password lama salah.");
       } else {
-        Alert.alert("Error", result.message || "Gagal mengganti password.");
+        Alert.alert("Error", "Gagal mengganti password.");
       }
     } catch (error) {
       Alert.alert("Error", "Server Error");

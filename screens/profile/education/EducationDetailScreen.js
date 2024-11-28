@@ -35,7 +35,7 @@ export default function EducationDetailScreen({ navigation }) {
         throw new Error("Failed to fetch education details");
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch education details");
+      Alert.alert("Error", "Gagal memuat data pendidikan");
     } finally {
       setLoading(false);
     }
