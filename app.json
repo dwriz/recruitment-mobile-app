@@ -30,6 +30,12 @@
         "projectId": "6839b4c9-9ac0-4275-abbc-008fbb31eb2b"
       }
     },
-    "owner": "dwriz"
+    "owner": "dwriz",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/6839b4c9-9ac0-4275-abbc-008fbb31eb2b"
+    }
   }
 }

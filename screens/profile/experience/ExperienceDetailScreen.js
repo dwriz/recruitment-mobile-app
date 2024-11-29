@@ -139,6 +139,12 @@ export default function ExperienceDetailScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>Tidak ada data pengalaman tersedia</Text>
+        <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate("CreateExperienceScreen")}
+      >
+        <Text style={styles.addButtonText}>Tambah Riwayat Pengalaman</Text>
+      </TouchableOpacity>
       </View>
     );
   }

@@ -137,6 +137,12 @@ export default function EducationDetailScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>Tidak ada data pendidikan tersedia</Text>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate("CreateEducationScreen")}
+        >
+          <Text style={styles.addButtonText}>Tambah Riwayat Pendidikan</Text>
+        </TouchableOpacity>
       </View>
     );
   }
